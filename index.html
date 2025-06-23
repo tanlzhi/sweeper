@@ -60,11 +60,16 @@
             </div>
         </header>
         
-        <!-- 难度选择 -->
-        <div class="p-4 bg-gray-50 border-b flex justify-center space-x-4">
-            <button data-difficulty="easy" class="difficulty-btn bg-green-500 text-white px-4 py-2 rounded-md font-medium hover:bg-green-600 transition">简单</button>
-            <button data-difficulty="medium" class="difficulty-btn bg-yellow-500 text-white px-4 py-2 rounded-md font-medium hover:bg-yellow-600 transition">中等</button>
-            <button data-difficulty="hard" class="difficulty-btn bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition">困难</button>
+        <!-- 难度选择和操作模式 -->
+        <div class="p-4 bg-gray-50 border-b flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-4">
+            <div class="flex space-x-4">
+                <button data-difficulty="easy" class="difficulty-btn bg-green-500 text-white px-4 py-2 rounded-md font-medium hover:bg-green-600 transition">简单</button>
+                <button data-difficulty="medium" class="difficulty-btn bg-yellow-500 text-white px-4 py-2 rounded-md font-medium hover:bg-yellow-600 transition">中等</button>
+                <button data-difficulty="hard" class="difficulty-btn bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition">困难</button>
+            </div>
+            <button id="mode-toggle" class="bg-gray-500 text-white px-4 py-2 rounded-md font-medium transition">
+                🖱️ 翻开模式
+            </button>
         </div>
         
         <!-- 游戏主区域 -->
@@ -93,10 +98,5 @@
     
     <script src="./main.js"></script>
 
-    <!-- 在body末尾添加触摸菜单 -->
-    <div id="touch-menu" class="fixed hidden bg-white shadow-lg rounded-md overflow-hidden z-50">
-        <div class="option py-3 px-6 hover:bg-gray-100 cursor-pointer" data-action="reveal">翻开</div>
-        <div class="option py-3 px-6 hover:bg-gray-100 cursor-pointer" data-action="flag">标记</div>
-    </div>
 </body>
 </html>
