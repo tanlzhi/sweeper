@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷游戏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .cell {
+            transition: all 0.2s ease;
+        }
+        .cell:active {
+            transform: scale(0.95);
+        }
+        @keyframes reveal {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .revealed {
+            animation: reveal 0.3s forwards;
+        }
+        /* 添加触摸菜单样式 */
+        #touch-menu {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            min-width: 120px;
+            transform-origin: top left;
+        }
+        
+        .option {
+            transition: all 0.15s ease;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .option:first-child {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .option:hover, .option.bg-blue-100 {
+            background-color: #3b82f6 !important;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-4xl bg-white rounded-xl shadow-xl overflow-hidden">
+        <!-- 游戏标题和状态栏 -->
+        <header class="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white text-center">
+            <h1 class="text-3xl font-bold">扫雷游戏</h1>
+            <div class="flex justify-between items-center mt-4">
+                <div id="timer" class="text-2xl font-mono">00:00</div>
+                <button id="restart" class="bg-white text-blue-600 px-4 py-2 rounded-full font-bold hover:bg-gray-100 transition">
+                    <i class="fas fa-redo mr-2"></i>重新开始
+                </button>
+                <div id="mines-count" class="text-2xl font-mono">💣 <span id="mines-left">10</span></div>
+            </div>
+        </header>
+        
+        <!-- 难度选择 -->
+        <div class="p-4 bg-gray-50 border-b flex justify-center space-x-4">
+            <button data-difficulty="easy" class="difficulty-btn bg-green-500 text-white px-4 py-2 rounded-md font-medium hover:bg-green-600 transition">简单</button>
+            <button data-difficulty="medium" class="difficulty-btn bg-yellow-500 text-white px-4 py-2 rounded-md font-medium hover:bg-yellow-600 transition">中等</button>
+            <button data-difficulty="hard" class="difficulty-btn bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition">困难</button>
+        </div>
+        
+        <!-- 游戏主区域 -->
+        <main class="p-4 flex flex-col items-center">
+            <div id="game-board" class="grid grid-cols-10 gap-1 bg-gray-300 p-2 rounded-lg">
+                <!-- 格子将通过JS动态生成 -->
+            </div>
+            
+            <!-- 游戏状态提示 -->
+            <div id="game-status" class="mt-4 text-xl font-bold text-center">点击格子开始游戏</div>
+        </main>
+        
+        <!-- 排行榜区域 -->
+        <section class="p-4 bg-gray-50 border-t">
+            <h2 class="text-xl font-bold text-center mb-3">排行榜</h2>
+            <div id="leaderboard" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- 排行榜内容将通过JS动态生成 -->
+            </div>
+        </section>
+    </div>
+    
+    <!-- 音效元素 -->
+    <audio id="click-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3"></audio>
+    <audio id="explosion-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-explosion-hit-759.mp3"></audio>
+    <audio id="win-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
+    
+    <script src="./main.js"></script>
+
+    <!-- 在body末尾添加触摸菜单 -->
+    <div id="touch-menu" class="fixed hidden bg-white shadow-lg rounded-md overflow-hidden z-50">
+        <div class="option py-3 px-6 hover:bg-gray-100 cursor-pointer" data-action="reveal">翻开</div>
+        <div class="option py-3 px-6 hover:bg-gray-100 cursor-pointer" data-action="flag">标记</div>
+    </div>
+</body>
+</html>
