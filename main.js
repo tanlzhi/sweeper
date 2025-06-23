@@ -26,9 +26,7 @@ const gameStatus = document.getElementById('game-status');
 const restartBtn = document.getElementById('restart');
 const difficultyBtns = document.querySelectorAll('.difficulty-btn');
 const leaderboard = document.getElementById('leaderboard');
-const touchMenu = document.getElementById('touch-menu');
-let touchStartCell = null;
-let selectedAction = null;
+let isMarkMode = false; // 操作模式状态
 
 // 音效
 const clickSound = document.getElementById('click-sound');
@@ -104,131 +102,21 @@ function renderBoard() {
             cell.dataset.row = r;
             cell.dataset.col = c;
             
-            // 添加触摸和点击事件
-            cell.addEventListener('click', () => revealCell(r, c));
-            cell.addEventListener('contextmenu', (e) => {
+            // 添加点击事件
+            cell.addEventListener('click', (e) => {
                 e.preventDefault();
-                flagCell(r, c);
+                if (isMarkMode) {
+                    flagCell(r, c);
+                } else {
+                    revealCell(r, c);
+                }
             });
-            
-            // 移动端触摸事件
-            cell.addEventListener('touchstart', handleTouchStart, { passive: false });
-            cell.addEventListener('touchmove', handleTouchMove, { passive: false });
-            cell.addEventListener('touchend', handleTouchEnd, { passive: false });
             
             gameBoard.appendChild(cell);
         }
     }
 }
 
-// 触摸事件处理
-function handleTouchStart(e) {
-    e.preventDefault();
-    const cell = e.target;
-    touchStartCell = {
-        row: parseInt(cell.dataset.row),
-        col: parseInt(cell.dataset.col),
-        element: cell
-    };
-    
-    // 显示触摸菜单
-    showTouchMenu(e.touches[0].clientX, e.touches[0].clientY);
-}
-
-function handleTouchMove(e) {
-    if (!touchMenu || touchMenu.classList.contains('hidden')) return;
-    
-    e.preventDefault();
-    const touch = e.touches[0];
-    const menuRect = touchMenu.getBoundingClientRect();
-    
-    // 检测触摸点是否在菜单选项上
-    const options = touchMenu.querySelectorAll('.option');
-    selectedAction = null;
-    
-    options.forEach(option => {
-        option.classList.remove('bg-blue-100');
-        const optionRect = option.getBoundingClientRect();
-        
-        if (touch.clientY >= optionRect.top && touch.clientY <= optionRect.bottom) {
-            option.classList.add('bg-blue-100');
-            selectedAction = option.dataset.action;
-        }
-    });
-}
-
-// 修改触摸结束函数，确保菜单能正确显示
-function handleTouchEnd(e) {
-    e.preventDefault();
-    
-    if (touchStartCell && selectedAction) {
-        // 执行选中的操作
-        if (selectedAction === 'reveal') {
-            revealCell(touchStartCell.row, touchStartCell.col);
-        } else if (selectedAction === 'flag') {
-            flagCell(touchStartCell.row, touchStartCell.col);
-        }
-        
-        // 震动反馈
-        if (navigator.vibrate) navigator.vibrate(30);
-    } else if (touchStartCell) {
-        // 如果没有选择操作，但已经开始触摸，则显示菜单
-        showTouchMenu(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-    }
-    
-    // 重置状态
-    hideTouchMenu();
-    touchStartCell = null;
-    selectedAction = null;
-}
-
-// 修改触摸菜单显示函数
-function showTouchMenu(x, y) {
-    // 确保菜单在视口范围内
-    const menuWidth = 120;
-    const menuHeight = 96; // 两个选项的高度
-    
-    let adjustedX = x;
-    let adjustedY = y;
-    
-    // 防止菜单超出屏幕右侧
-    if (x + menuWidth > window.innerWidth) {
-        adjustedX = window.innerWidth - menuWidth - 10;
-    }
-    
-    // 防止菜单超出屏幕底部
-    if (y + menuHeight > window.innerHeight) {
-        adjustedY = window.innerHeight - menuHeight - 10;
-    }
-    
-    touchMenu.style.left = `${adjustedX}px`;
-    touchMenu.style.top = `${adjustedY}px`;
-    touchMenu.classList.remove('hidden');
-    
-    // 添加动画效果
-    touchMenu.style.transform = 'scale(0.8)';
-    touchMenu.style.opacity = '0';
-    
-    setTimeout(() => {
-        touchMenu.style.transition = 'all 0.2s ease';
-        touchMenu.style.transform = 'scale(1)';
-        touchMenu.style.opacity = '1';
-    }, 10);
-}
-
-// 隐藏触摸菜单
-function hideTouchMenu() {
-    touchMenu.style.transition = 'all 0.2s ease';
-    touchMenu.style.transform = 'scale(0.8)';
-    touchMenu.style.opacity = '0';
-    
-    setTimeout(() => {
-        touchMenu.classList.add('hidden');
-        // 移除高亮
-        const options = touchMenu.querySelectorAll('.option');
-        options.forEach(option => option.classList.remove('bg-blue-100'));
-    }, 200);
-}
 
 // 翻开格子
 function revealCell(row, col) {
@@ -438,6 +326,14 @@ function updateLeaderboard() {
 
 // 事件监听
 restartBtn.addEventListener('click', initGame);
+
+// 添加模式切换按钮事件
+document.getElementById('mode-toggle').addEventListener('click', (e) => {
+    isMarkMode = !isMarkMode;
+    e.target.textContent = isMarkMode ? '🚩 标记模式' : '🖱️ 翻开模式';
+    e.target.classList.toggle('bg-blue-500');
+    e.target.classList.toggle('bg-gray-500');
+});
 
 difficultyBtns.forEach(btn => {
     btn.addEventListener('click', () => {
