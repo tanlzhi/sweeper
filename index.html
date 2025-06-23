@@ -7,8 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* 禁用文本选择 */
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
         .cell {
             transition: all 0.2s ease;
+            -webkit-touch-callout: none;
         }
         .cell:active {
             transform: scale(0.95);
@@ -19,30 +28,6 @@
         }
         .revealed {
             animation: reveal 0.3s forwards;
-        }
-        /* 添加触摸菜单样式 */
-        #touch-menu {
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border-radius: 12px;
-            overflow: hidden;
-            z-index: 1000;
-            min-width: 120px;
-            transform-origin: top left;
-        }
-        
-        .option {
-            transition: all 0.15s ease;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        
-        .option:first-child {
-            border-bottom: 1px solid #eee;
-        }
-        
-        .option:hover, .option.bg-blue-100 {
-            background-color: #3b82f6 !important;
-            color: white;
         }
     </style>
 </head>
@@ -74,8 +59,10 @@
         
         <!-- 游戏主区域 -->
         <main class="p-4 flex flex-col items-center">
-            <div id="game-board" class="grid grid-cols-10 gap-1 bg-gray-300 p-2 rounded-lg">
-                <!-- 格子将通过JS动态生成 -->
+            <div class="w-full overflow-x-auto touch-pan-x bg-gray-300 rounded-lg p-2 flex justify-center"> <!-- 添加flex布局 -->
+                <div id="game-board" class="grid gap-1 justify-items-center items-center">
+                    <!-- 格子将通过JS动态生成 -->
+                </div>
             </div>
             
             <!-- 游戏状态提示 -->
