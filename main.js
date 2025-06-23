@@ -91,9 +91,32 @@ function renderBoard() {
     gameBoard.innerHTML = '';
     const { rows, cols } = DIFFICULTY_SETTINGS[gameState.difficulty];
     
-    // 设置网格布局
+    // 设置网格布局和自适应宽度
     gameBoard.className = `grid gap-1 bg-gray-300 p-2 rounded-lg`;
-    gameBoard.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+    gameBoard.style.gridTemplateColumns = `repeat(${cols}, minmax(2.5rem, 1fr))`; // 最小宽度2.5rem
+    gameBoard.style.maxWidth = `${cols * 2.7}rem`; // 设置最大宽度
+    gameBoard.style.margin = '0 auto'; // 添加自动边距居中
+    
+    // 添加触摸滑动支持
+    let touchStartX = 0;
+    let isScrolling = false;
+    
+    gameBoard.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        isScrolling = false;
+    }, { passive: true });
+
+    gameBoard.addEventListener('touchmove', (e) => {
+        if (Math.abs(e.touches[0].clientX - touchStartX) > 5) {
+            isScrolling = true;
+        }
+    }, { passive: true });
+
+    gameBoard.addEventListener('touchend', (e) => {
+        if (isScrolling) {
+            e.preventDefault(); // 阻止默认点击事件
+        }
+    }, { passive: false });
     
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
