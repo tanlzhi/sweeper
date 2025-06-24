@@ -15,8 +15,92 @@ let gameState = {
     gameOver: false,
     gameWon: false,
     startTime: null,
-    timerInterval: null
+    timerInterval: null,
+    cellStates: [] // 新增格子状态存储
 };
+
+// 新增存档功能
+function saveGame() {
+    if (gameState.gameOver || gameState.gameWon) {
+        alert('游戏已结束，无法存档');
+        return;
+    }
+    
+    // 收集所有格子状态
+    gameState.cellStates = [];
+    document.querySelectorAll('.cell').forEach(cell => {
+        gameState.cellStates.push({
+            revealed: cell.classList.contains('revealed'),
+            flagged: cell.classList.contains('flagged'),
+            content: cell.innerHTML
+        });
+    });
+    
+    const saveData = {
+        ...gameState,
+        startTime: gameState.startTime ? gameState.startTime.getTime() : null,
+        timerDisplay: timerDisplay.textContent,
+        minesLeft: minesLeftDisplay.textContent
+    };
+    
+    localStorage.setItem('minesweeperSave', JSON.stringify(saveData));
+    alert('游戏已存档');
+}
+
+// 新增读档功能
+function loadGame() {
+    const savedData = localStorage.getItem('minesweeperSave');
+    if (!savedData) {
+        alert('没有找到存档');
+        return;
+    }
+    
+    const save = JSON.parse(savedData);
+    if (save.gameOver || save.gameWon) {
+        localStorage.removeItem('minesweeperSave');
+        alert('存档已失效');
+        return;
+    }
+    
+    // 恢复基本状态
+    gameState = {
+        ...save,
+        startTime: save.startTime ? new Date(save.startTime) : null,
+        timerInterval: null,
+        cellStates: save.cellStates
+    };
+    
+    // 恢复界面状态
+    minesLeftDisplay.textContent = save.minesLeft;
+    timerDisplay.textContent = save.timerDisplay;
+    gameStatus.textContent = '已恢复存档，继续游戏';
+    
+    // 重新创建棋盘
+    const { rows, cols } = DIFFICULTY_SETTINGS[gameState.difficulty];
+    renderBoard();
+    
+    // 恢复计时器
+    if (gameState.startTime) {
+        gameState.timerInterval = setInterval(updateTimer, 1000);
+    }
+    
+    // 恢复格子状态
+    document.querySelectorAll('.cell').forEach((cell, index) => {
+        const state = gameState.cellStates[index];
+        cell.className = 'cell w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border border-gray-400 rounded cursor-pointer font-bold text-center shadow-sm';
+        
+        if (state.revealed) {
+            cell.classList.add('revealed');
+            cell.style.backgroundColor = '#fff';
+        }
+        if (state.flagged) {
+            cell.classList.add('flagged', 'bg-yellow-300');
+        }
+        cell.innerHTML = state.content;
+    });
+    
+    updateLeaderboard();
+}
 
 // DOM元素
 const gameBoard = document.getElementById('game-board');
@@ -36,8 +120,7 @@ const winSound = document.getElementById('win-sound');
 // 初始化游戏
 function initGame() {
     clearInterval(gameState.timerInterval);
-    timerDisplay.textContent = '00:00';
-    
+    timerDisplay.textContent = '00:00';   
     const { rows, cols, mines } = DIFFICULTY_SETTINGS[gameState.difficulty];
     gameState = {
         ...gameState,
@@ -91,9 +174,32 @@ function renderBoard() {
     gameBoard.innerHTML = '';
     const { rows, cols } = DIFFICULTY_SETTINGS[gameState.difficulty];
     
-    // 设置网格布局
+    // 设置网格布局和自适应宽度
     gameBoard.className = `grid gap-1 bg-gray-300 p-2 rounded-lg`;
-    gameBoard.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+    gameBoard.style.gridTemplateColumns = `repeat(${cols}, minmax(2.5rem, 1fr))`; // 最小宽度2.5rem
+    gameBoard.style.maxWidth = `${cols * 2.7}rem`; // 设置最大宽度
+    gameBoard.style.margin = '0 auto'; // 添加自动边距居中
+    
+    // 添加触摸滑动支持
+    let touchStartX = 0;
+    let isScrolling = false;
+    
+    gameBoard.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        isScrolling = false;
+    }, { passive: true });
+
+    gameBoard.addEventListener('touchmove', (e) => {
+        if (Math.abs(e.touches[0].clientX - touchStartX) > 5) {
+            isScrolling = true;
+        }
+    }, { passive: true });
+
+    gameBoard.addEventListener('touchend', (e) => {
+        if (isScrolling) {
+            e.preventDefault(); // 阻止默认点击事件
+        }
+    }, { passive: false });
     
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
