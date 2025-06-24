@@ -114,6 +114,7 @@ let isMarkMode = false; // 操作模式状态
 
 // 音效
 const clickSound = document.getElementById('click-sound');
+const flagSound = document.getElementById('flag-sound'); // 新增标记音效
 const explosionSound = document.getElementById('explosion-sound');
 const winSound = document.getElementById('win-sound');
 
@@ -286,10 +287,16 @@ function flagCell(row, col) {
         cell.innerHTML = '';
         cell.classList.remove('flagged', 'bg-yellow-300');
         gameState.flagged--;
+        // 播放取消标记音效
+        flagSound.currentTime = 0;
+        flagSound.play().catch(e => console.log("Audio play failed:", e));
     } else {
         cell.innerHTML = '🚩';
         cell.classList.add('flagged', 'bg-yellow-300');
         gameState.flagged++;
+        // 播放标记音效
+        flagSound.currentTime = 0;
+        flagSound.play().catch(e => console.log("Audio play failed:", e));
     }
     
     minesLeftDisplay.textContent = gameState.mines - gameState.flagged;
